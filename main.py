@@ -1,4 +1,5 @@
 from tabulate import tabulate
+from csv import writer, reader
 
 # List of team members
 team_members = ["Hadar", "Matasas", "Ofer", "Nissan", "Or", "Michal", "Eylon", "Pavel", "Ido"]
@@ -88,7 +89,7 @@ def update_shift_space(day, shift):
         shifts_space[member] += 1
 
 
-def set_on_call_for_team_member(day, shift):
+def set_on_call_for_team_member(shift):
     '''
     Set a team member to be on call according to his shift space and past on-call duties
     '''
@@ -133,10 +134,68 @@ def build_shifts_schedule():
             # Add the team member back to the team_members list
             team_members.append(schedule[day][shift])
 
-            set_on_call_for_team_member(day, shift)
+            set_on_call_for_team_member(shift)
 
+
+def initialize_shift_according_to_old_schedule_hard_coded():
+    '''
+    Initialize the shifts schedule according to old schedule, including on-call duties, shifts space and hard shifts count for each team member since their last day off
+    '''
+
+    global on_call, hard_shifts_count, shifts_space
+
+    # Initialize on-call duties
+    # For instance: on_call_count["Matasas"] = 1
+
+    # Initialize shifts space
+    # For instance:
+    #   shifts_space["Matasas"] = 2
+    #   shifts_space["Ofer"] = 3
+
+    # Initialize hard shifts count
+    # For instance:
+    #   hard_shifts_count["Matasas"] = 2
+    #   hard_shift_count["Ofer"] = 1
+
+    pass
+    
+
+def write_to_csv_file():
+    # write the scehdule to a csv file
+    
+    with open("schedule.csv", "w", newline="") as file:
+        csv_writer = writer(file)
+        csv_writer.writerow(["Shift"] + days_of_week)
+
+        for shift in shifts:
+            csv_writer.writerow([f"{shift[0]} - {shift[1]}"] + [schedule[day][shift] for day in days_of_week])
+
+        csv_writer.writerow([f"On Call"] + [member for member in on_call])
+
+
+def load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedule():
+    global on_call, schedule
+
+    with open("schedule.csv", "r", newline="") as file:
+        csv_reader = reader(file)
+
+        for row in csv_reader:
+            if row[0] == "Shift":
+                continue
+
+            if row[0] == "On Call":
+                on_call = row[1:]
+                continue
+
+            for day in days_of_week:
+                schedule[day][tuple(row[0].split(" - "))] = row[days_of_week.index(day) + 1]
+
+    # initialize_shift_according_to_old_schedule()
+        
 
 if __name__ == "__main__":
-
+    load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedule()
+    initialize_shift_according_to_old_schedule_hard_coded()
     build_shifts_schedule()
     print_shifts_schedule()
+    write_to_csv_file()
