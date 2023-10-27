@@ -1,5 +1,6 @@
 from tabulate import tabulate
 from csv import writer, reader
+import math
 
 # Constants
 SUNDAY = "Sunday"
@@ -11,8 +12,10 @@ FRIDAY = "Friday"
 SATURDAY = "Saturday"
 SHIFT = "Shift"
 ON_CALL = "On Call"
+NORMAL = "normal"
+DOUBLE = "double"
 ON_CALL_SHIFT = ("22:00", "01:00")
-MAX_HARD_SHIFTS_PER_WEEK = 2
+MAX_HARD_SHIFTS_PER_WEEK = 0
 DAY_OFF_START_SHIFT_INDEX = 0
 DAY_OFF_END_SHIFT_INDEX = 1
 DAY_OFF_TEAM_MEMBERS_INDEX = 2
@@ -105,7 +108,10 @@ def set_shift_to_relevant_team_member(day, shift):
 
         hard_shifts_count[team_members[member_index]] += 1
 
-    schedule[day][shift] = team_members.pop(member_index)
+    if schedule[day][shift] == "":
+        schedule[day][shift] = team_members[member_index]
+    else:
+        schedule[day][shift] = f"{schedule[day][shift]}, {team_members[member_index]}"
 
 
 def update_shift_space(day, shift):
@@ -113,7 +119,9 @@ def update_shift_space(day, shift):
     Update shifts space for each team member
     '''
 
-    shifts_space[schedule[day][shift]] = -1
+    for member in schedule[day][shift].split(", "):
+        shifts_space[member] = -1
+
     for member in team_members:
         shifts_space[member] += 1
 
@@ -123,11 +131,14 @@ def set_on_call_for_team_member(shift):
     Set a team member to be on call according to his shift space and past on-call duties
     '''
 
-    if shift == ON_CALL_SHIFT:
+    if shift == ON_CALL_SHIFT and choice == NORMAL:
         member_index = 0
+
+        team_members.sort(key=lambda member: shifts_space[member], reverse=True)
 
         while member_index < len(team_members):
             if on_call_count[team_members[member_index]] == 0:
+                print(f"{team_members[member_index]} has been chosen to be on call.")
                 break
             member_index += 1
 
@@ -142,26 +153,29 @@ def print_shifts_schedule():
     for shift in shifts:
         table.append([f"{shift[0]} - {shift[1]}"] + [schedule[day][shift] for day in work_days])
 
-    table.append([f"{ON_CALL}"] + [member for member in on_call])
+    if choice == NORMAL:
+        table.append([f"{ON_CALL}"] + [member for member in on_call])
 
     print(tabulate(table, headers="firstrow", tablefmt="pretty"))
 
 
 def build_shifts_schedule():
+    number_of_people_per_shift = 1 if choice == NORMAL else 2
+
     for day in work_days:
         for shift in shifts:
 
             remove_team_members_if_day_off_is_on(day, shift)
             add_team_members_if_day_off_is_over(day, shift)
 
-            team_members.sort(key=lambda member: shifts_space[member], reverse=True)
+            schedule[day][shift] = ""
 
-            set_shift_to_relevant_team_member(day, shift)
+            for _ in range(number_of_people_per_shift):
+                team_members.sort(key=lambda member: shifts_space[member], reverse=True)
 
-            update_shift_space(day, shift)
+                set_shift_to_relevant_team_member(day, shift)
 
-            # Add the team member back to the team_members list
-            team_members.append(schedule[day][shift])
+                update_shift_space(day, shift)
 
             set_on_call_for_team_member(shift)
 
@@ -226,9 +240,38 @@ def load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedu
     # initialize_shift_according_to_old_schedule()
         
 
-if __name__ == "__main__":
+def get_user_choice():
+    global choice, MAX_HARD_SHIFTS_PER_WEEK
+
+    print("Welcome to the shift script.")
+    print('''
+Choose the type of shifts you'd like to create:
+    1. Normal (one officer)
+    2. Double (two officers)
+''')
+
+    while True:
+        choice = input("Your choice: ")
+        if choice.isdigit() and 1 <= int(choice) <= 2:
+            break
+        else:
+            print("Invalid input. Please try again.")
+    
+    choice = NORMAL if choice == "1" else DOUBLE
+    MAX_HARD_SHIFTS_PER_WEEK = 2 if choice == NORMAL else math.inf
+
+    print(f"You chose to create {choice} shifts schedule.")
+
+
+def start_script():
+    get_user_choice()
+
     # load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedule()
-    initialize_shift_according_to_old_schedule_hard_coded()
+    # initialize_shift_according_to_old_schedule_hard_coded()
     build_shifts_schedule()
     print_shifts_schedule()
     write_to_csv_file()
+
+
+if __name__ == "__main__":
+    start_script()
