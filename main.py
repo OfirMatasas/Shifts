@@ -14,12 +14,12 @@ SHIFT = "Shift"
 ON_CALL = "On Call"
 NORMAL = "normal"
 DOUBLE = "double"
-ON_CALL_SHIFT = ("22:00", "01:00")
-MAX_HARD_SHIFTS_PER_WEEK = 0
+ON_CALL_SHIFT = ("19:00", "22:00")
+MAX_HARD_SHIFTS_PER_WEEK = 2
 DAY_OFF_START_SHIFT_INDEX = 0
 DAY_OFF_END_SHIFT_INDEX = 1
 DAY_OFF_TEAM_MEMBERS_INDEX = 2
-SPACE_ON_CALL = -4
+SPACE_ON_CALL = -5
 
 # Team members' names
 HADAR = "Hadar"
@@ -31,6 +31,10 @@ MICHAL = "Michal"
 EYLON = "Eylon"
 PAVEL = "Pavel"
 IDO = "Ido"
+STEFANOV = "Stefanov"
+WEISS = "Weiss"
+SHAPIRA = "Shapira"
+ASSAF = "Assaf"
 
 # Define the shifts (24 hours divided into 3-hour shifts)
 shifts = [(f"{hour:02}:00", f"{(hour + 3) % 24:02}:00") for hour in range(1, 24, 3)]
@@ -86,8 +90,9 @@ def add_team_members_if_day_off_is_over(day, shift):
             for member in day_off[DAY_OFF_TEAM_MEMBERS_INDEX]:
                 if member not in team_members:
                     team_members.append(member)
-                    shifts_space[member] = 0
+                    shifts_space[member] = 100
                     hard_shifts_count[member] = 0
+                    on_call_count[member] = 0
 
             team_members.reverse()
             team_members_on_day_off = []
@@ -138,7 +143,6 @@ def set_on_call_for_team_member(shift):
 
         while member_index < len(team_members):
             if on_call_count[team_members[member_index]] == 0:
-                print(f"{team_members[member_index]} has been chosen to be on call.")
                 break
             member_index += 1
 
@@ -217,7 +221,8 @@ def write_to_csv_file():
         for shift in shifts:
             csv_writer.writerow([f"{shift[0]} - {shift[1]}"] + [schedule[day][shift] for day in work_days])
 
-        csv_writer.writerow([f"{ON_CALL}"] + [member for member in on_call])
+        if choice == NORMAL:
+            csv_writer.writerow([f"{ON_CALL}"] + [member for member in on_call])
 
 
 def load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedule():
@@ -258,7 +263,7 @@ Choose the type of shifts you'd like to create:
             print("Invalid input. Please try again.")
     
     choice = NORMAL if choice == "1" else DOUBLE
-    MAX_HARD_SHIFTS_PER_WEEK = 2 if choice == NORMAL else math.inf
+    MAX_HARD_SHIFTS_PER_WEEK = MAX_HARD_SHIFTS_PER_WEEK if choice == NORMAL else math.inf
 
     print(f"You chose to create {choice} shifts schedule.")
 
@@ -267,7 +272,7 @@ def start_script():
     get_user_choice()
 
     # load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedule()
-    # initialize_shift_according_to_old_schedule_hard_coded()
+    initialize_shift_according_to_old_schedule_hard_coded()
     build_shifts_schedule()
     print_shifts_schedule()
     write_to_csv_file()
