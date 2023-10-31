@@ -42,8 +42,8 @@ shifts_space = {key: 0 for key in team_members}
 
 # Define the work days
 workday_seq = WorkdayUtils().create_workday_sequence()
-work_days = workday_seq.get_day_names()
-work_days_dates = workday_seq.get_day_dates()
+work_days = workday_seq.day_names
+work_days_dates = workday_seq.day_dates
 
 # Define the days off
 days_off = [
