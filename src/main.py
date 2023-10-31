@@ -4,8 +4,7 @@ import math
 from util.workday_util import WorkdayUtils
 
 # Constants
-SHIFT = "Shift Day"
-SHIFT_DATE = 'Shift Date'
+SHIFT = "Shift\n"
 ON_CALL = "On Call"
 NORMAL = "normal"
 DOUBLE = "double"
@@ -42,9 +41,9 @@ hard_shifts_hours = [("01:00", "04:00"), ("04:00", "07:00")]
 shifts_space = {key: 0 for key in team_members}
 
 # Define the work days
-assigned_days = WorkdayUtils().create_workday_sequence(starting_day='30-10-2023', ending_day='4-11-2023')
-work_days = assigned_days[0]
-work_days_dates = assigned_days[1]
+workday_seq = WorkdayUtils().create_workday_sequence()
+work_days = workday_seq.get_day_names()
+work_days_dates = workday_seq.get_day_dates()
 
 # Define the days off
 days_off = [
@@ -149,7 +148,7 @@ def set_on_call_for_team_member(shift):
 
 
 def print_shifts_schedule():
-    table = [[SHIFT] + work_days, [SHIFT_DATE] + work_days_dates, ['*' for _ in range(0, len(work_days_dates) + 1)]]
+    table = [[SHIFT] + [f'{work_days[i]}\n{work_days_dates[i]}' for i in range(0, len(work_days))]]
 
     for shift in shifts:
         table.append([f"{shift[0]} - {shift[1]}"] + [schedule[day][shift] for day in work_days])
