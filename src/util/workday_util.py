@@ -1,16 +1,17 @@
-
 import datetime
 import logging
+from typing import Final
 
 class WorkdayUtils:
     """
     Static class for working with workdays
     """
 
-    _date_format = '%d-%m-%Y'
+    DATE_FORMAT: Final[str] = '%d-%m-%Y'
+    DEFAULT_DAYS_COUNT: Final[int] = 5
 
-    @classmethod
-    def is_valid_date_string(cls, date: str) -> bool:
+    @staticmethod
+    def is_valid_date_string(date: str) -> bool:
         """
         date: The date we validate
 
@@ -24,7 +25,7 @@ class WorkdayUtils:
             logging.warning('Date is empty')
             is_valid = False
 
-        if len(date.split('-')) != 3:
+        if date is not None and len(date.split('-')) != 3:
             logging.warning('Date should be of format day-month-year')
             is_valid = False
         
@@ -44,9 +45,9 @@ class WorkdayUtils:
         weekdays_dates = []
 
         if not cls.is_valid_date_string(starting_day):
-            starting_day = datetime.datetime.today().strftime(cls._date_format)
+            starting_day = datetime.datetime.today().strftime(cls.DATE_FORMAT)
         if not cls.is_valid_date_string(ending_day):
-            ending_day = (datetime.datetime.now() + datetime.timedelta(5)).strftime(cls._date_format)
+            ending_day = (datetime.datetime.now() + datetime.timedelta(cls.DEFAULT_DAYS_COUNT - 1)).strftime(cls.DATE_FORMAT)
             
 
         begin_date = ''
@@ -57,8 +58,12 @@ class WorkdayUtils:
         try:
             start_date_data = separate_date(starting_day)
             end_date_data = separate_date(ending_day)
-            begin_date = datetime.date(start_date_data[2], start_date_data[1], start_date_data[0])
-            end_date = datetime.date(end_date_data[2], end_date_data[1], end_date_data[0])
+
+            start_date_data.reverse()
+            end_date_data.reverse()
+
+            begin_date = datetime.date(*start_date_data)
+            end_date = datetime.date(*end_date_data)
 
         except ValueError as ve:
             logging.error(f'Error while parsing date: {ve}')
@@ -74,7 +79,7 @@ class WorkdayUtils:
         delta_date = datetime.timedelta(1)
 
         while begin_date <= end_date:
-            weekdays_dates.append(begin_date.strftime(cls._date_format))
+            weekdays_dates.append(begin_date.strftime(cls.DATE_FORMAT))
             weekdays_names.append(begin_date.strftime('%A'))
             begin_date += delta_date
 
