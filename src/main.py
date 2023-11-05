@@ -48,7 +48,8 @@ shifts_hours = [hour for hour in range(DEFAULT_FIRST_SHIFT_START_TIME, HOURS_IN_
 team_members = [HADAR, MATASAS, OFER, NISSAN, OR, MICHAL, EYLON, PAVEL, IDO, STEFANOV, WEISS, SHAPIRA, ASSAF]
 hard_shifts_count = {key: 0 for key in team_members}
 on_call_count = {key: 0 for key in team_members}
-hard_shifts_hours = (Shift(start_time=datetime(year=2023, month=1, day=1, hour=1)), Shift(start_time=datetime(year=2023, month=1, day=1, hour=4)))
+hard_shifts_hours = (Shift(start_time=datetime(year=2023, month=1, day=1, hour=1)),
+                     Shift(start_time=datetime(year=2023, month=1, day=1, hour=4)))
 shifts_space = {key: 0 for key in team_members}
 
 # Define the work days
@@ -59,7 +60,8 @@ work_days_dates = workday_seq.day_dates
 # Define the days off
 days_off = (
     # (START_SHIFT, END_SHIFT, [TEAM_MEMBERS]),
-    # (Shift(day=SUNDAY, start_time=datetime(year=2023, month=1, day=1, hour=22)), Shift(day=WEDNESDAY, start_time=datetime(year=2023, month=1, day=1, hour=22)), [HADAR, MATASAS]),
+    # (Shift(day=SUNDAY, start_time=datetime(year=2023, month=1, day=1, hour=22)),
+    #  Shift(day=WEDNESDAY, start_time=datetime(year=2023, month=1, day=1, hour=22)), [HADAR, MATASAS]),
 )
 team_members_on_day_off = []
 on_call = []
@@ -70,12 +72,14 @@ schedule = {day: {} for day in work_days}
 
 def remove_team_members_if_day_off_is_on(shift: Shift):
     '''
-    Check if the current shift is a start of a day off. If so - add the team members to the team_members_on_day_off list and remove them from the team_members list
+    Check if the current shift is a start of a day off.
+    If so - add the team members to the team_members_on_day_off list and remove them from the team_members list
     '''
 
     for day_off in days_off:
         if shift == day_off[DAY_OFF_START_SHIFT_INDEX]:
-            log.info(f"Day off started: {shift.day}, {shift}. Removing team members {day_off[DAY_OFF_TEAM_MEMBERS_INDEX]} from team_members list")
+            log.info(f"Day off started: {shift.day}, {shift}. " +
+                     "Removing team members {day_off[DAY_OFF_TEAM_MEMBERS_INDEX]} from team_members list")
             for member in day_off[DAY_OFF_TEAM_MEMBERS_INDEX]:
                 if member in team_members:
                     log.debug(f"Adding {member} to team_members_on_day_off")
@@ -95,14 +99,16 @@ def remove_team_members_if_day_off_is_on(shift: Shift):
 
 def add_team_members_if_day_off_is_over(shift: Shift):
     '''
-    Check if the current shift is an end of a day off. If so - add the team members back to the team_members list and remove them from the team_members_on_day_off list
+    Check if the current shift is an end of a day off.
+    If so - add the team members back to the team_members list and remove them from the team_members_on_day_off list
     '''
 
     global team_members_on_day_off
 
     for day_off in days_off:
         if shift == day_off[DAY_OFF_END_SHIFT_INDEX]:
-            log.info(f"Day off ended: {shift.day}, {shift}. Adding team members {day_off[DAY_OFF_TEAM_MEMBERS_INDEX]} back to team_members list")
+            log.info(f"Day off ended: {shift.day}, {shift}. " +
+                     "Adding team members {day_off[DAY_OFF_TEAM_MEMBERS_INDEX]} back to team_members list")
             team_members.reverse()
 
             for member in day_off[DAY_OFF_TEAM_MEMBERS_INDEX]:
@@ -126,7 +132,8 @@ def add_team_members_if_day_off_is_over(shift: Shift):
 
 def look_for_team_member_with_minimal_hard_shifts_count(shift: Shift):
     '''
-    Set the current shift to the team member with the maximum amount of shifts space, as long as they didn't have 2 hard shifts already earlier this week
+    Set the current shift to the team member with the maximum amount of shifts space,
+    as long as they didn't have 2 hard shifts already earlier this week
     '''
 
     member_index = 0
@@ -137,10 +144,12 @@ def look_for_team_member_with_minimal_hard_shifts_count(shift: Shift):
         current_member_hard_shifts_count = hard_shifts_count[current_member]
 
         if 0 <= current_member_hard_shifts_count < MAX_HARD_SHIFTS_PER_WEEK:
-            log.debug(f"Set {shift} to {current_member} (hard shifts count: {current_member_hard_shifts_count} out of {MAX_HARD_SHIFTS_PER_WEEK})")
+            log.debug(f"Set {shift} to {current_member} " +
+                      f"(hard shifts count: {current_member_hard_shifts_count} out of {MAX_HARD_SHIFTS_PER_WEEK})")
             break
 
-        log.debug(f"Skipping {current_member} (hard shifts count: {current_member_hard_shifts_count} out of {MAX_HARD_SHIFTS_PER_WEEK})")
+        log.debug(f"Skipping {current_member} " +
+                  f"(hard shifts count: {current_member_hard_shifts_count} out of {MAX_HARD_SHIFTS_PER_WEEK})")
         member_index += 1
 
     return member_index
@@ -148,25 +157,29 @@ def look_for_team_member_with_minimal_hard_shifts_count(shift: Shift):
 
 def set_team_member_to_shift(shift: Shift):
     '''
-    Set the current shift to the team member with the maximum amount of shifts space, as long as they didn't have {MAX_HARD_SHIFTS_PER_WEEK} hard shifts already earlier this week
+    Set the current shift to the team member with the maximum amount of shifts space,
+    as long as they didn't have {MAX_HARD_SHIFTS_PER_WEEK} hard shifts already earlier this week
     '''
 
     log.debug(f"Looking for a team member to set {shift} on {shift.day}")
 
     member_index = 0
-    
+
     for hard_shift in hard_shifts_hours:
         if shift.is_same_time(hard_shift):
             log.info(f"Hard shift {shift} found")
             member_index = look_for_team_member_with_minimal_hard_shifts_count(shift)
 
-            log.info(f"Set hard shift {shift} to {team_members[member_index]} (hard shifts count: {hard_shifts_count[team_members[member_index]]} out of {MAX_HARD_SHIFTS_PER_WEEK})")
+            log.info(f"Set hard shift {shift} to {team_members[member_index]} " +
+                     f"(hard shifts count: {hard_shifts_count[team_members[member_index]]}" +
+                     f" out of {MAX_HARD_SHIFTS_PER_WEEK})")
             hard_shifts_count[team_members[member_index]] += 1
-            log.debug(f"{team_members[member_index]} new hard shifts count: {hard_shifts_count[team_members[member_index]]}")
+            log.debug(f"{team_members[member_index]} " +
+                      f"new hard shifts count: {hard_shifts_count[team_members[member_index]]}")
 
             break
 
-    if schedule[shift.day][str(shift)] == None:
+    if schedule[shift.day][str(shift)] is None:
         schedule[shift.day][str(shift)] = team_members[member_index]
         log.info(f"Set {shift.day} {str(shift)} to {schedule[shift.day][str(shift)]}")
     else:
@@ -201,22 +214,27 @@ def set_on_call_for_team_member(shift: Shift):
 
         while member_index < len(team_members):
             if on_call_count[team_members[member_index]] == 0:
-                log.debug(f"Set {team_members[member_index]} to be on call for {shift.day} {str(shift)} (on call count: {on_call_count[team_members[member_index]]})")
+                log.debug(f"Set {team_members[member_index]} to be on call for " +
+                          f"{shift.day} {str(shift)} (on call count: {on_call_count[team_members[member_index]]})")
                 break
             member_index += 1
 
-        log.info(f"Set {team_members[member_index]} to be on call for {shift.day} {str(shift)} (on call count: {on_call_count[team_members[member_index]]})")
+        log.info(f"Set {team_members[member_index]} to be on call for {shift.day} " +
+                 f"{str(shift)} (on call count: {on_call_count[team_members[member_index]]})")
         on_call_count[team_members[member_index]] += 1
         on_call.append(team_members[member_index])
         shifts_space[team_members[member_index]] += SPACE_ON_CALL
-        log.debug(f"{team_members[member_index]} new shifts space has changed from {shifts_space[team_members[member_index]] - SPACE_ON_CALL} to {shifts_space[team_members[member_index]]}")
+        log.debug(f"{team_members[member_index]} new shifts space has changed from " +
+                  f"{shifts_space[team_members[member_index]] - SPACE_ON_CALL} " +
+                  f"to {shifts_space[team_members[member_index]]}")
 
 
 def print_shifts_schedule():
     table = [[SHIFT] + [f'{work_days[i]}\n{work_days_dates[i]}' for i in range(0, len(work_days))]]
 
     for shift_hours in shifts_hours:
-        table.append([f"{shift_hours:02}:00-{(shift_hours + 3)%24:02}:00"] + [schedule[day][str(Shift(day, datetime(year=2023, month=1, day=1, hour=shift_hours)))] for day in work_days])
+        table.append([f"{shift_hours:02}:00-{(shift_hours + 3)%24:02}:00"] + [schedule[day]
+                     [str(Shift(day, datetime(year=2023, month=1, day=1, hour=shift_hours)))] for day in work_days])
 
     if choice == NORMAL:
         table.append([f"{ON_CALL}"] + [member for member in on_call])
@@ -225,7 +243,8 @@ def print_shifts_schedule():
 
 
 def build_shifts_schedule():
-    number_of_people_per_shift = NUM_OF_MEMBERS_PER_NORMAL_SHIFT if choice == NORMAL else NUM_OF_MEMBERS_PER_DOUBLE_SHIFT
+    number_of_people_per_shift = NUM_OF_MEMBERS_PER_NORMAL_SHIFT\
+        if choice == NORMAL else NUM_OF_MEMBERS_PER_DOUBLE_SHIFT
 
     for day in work_days:
         log.debug(f"Building schedule for {day}")
@@ -250,7 +269,8 @@ def build_shifts_schedule():
 
 def initialize_shift_according_to_old_schedule_hard_coded():
     '''
-    Initialize the shifts schedule according to old schedule, including on-call duties, shifts space and hard shifts count for each team member since their last day off
+    Initialize the shifts schedule according to old schedule,
+    including on-call duties, shifts space and hard shifts count for each team member since their last day off
     '''
 
     global on_call, hard_shifts_count, shifts_space
@@ -273,17 +293,18 @@ def initialize_shift_according_to_old_schedule_hard_coded():
     # For instance:
     #   team_members.remove(PAVEL)
     #   team_members.remove(MICHAL)
-    
+
 
 def write_to_csv_file():
     # write the scehdule to a csv file
-    
     with open(WRITE_FILE_NAME, "w", newline="") as file:
         csv_writer = writer(file)
         csv_writer.writerow([SHIFT] + work_days)
 
         for shift in shifts_hours:
-            csv_writer.writerow([f"{shift:02}:00-{(shift + 3)%24:02}:00"] + [schedule[day][str(Shift(day, datetime(year=2023, month=1, day=1, hour=shift)))] for day in work_days])
+            csv_writer.writerow([f"{shift:02}:00-{(shift + 3)%24:02}:00"] +
+                                [schedule[day][str(Shift(day, datetime(year=2023, month=1, day=1, hour=shift)))]
+                                for day in work_days])
 
         if choice == NORMAL:
             csv_writer.writerow([f"{ON_CALL}"] + [member for member in on_call])
@@ -307,7 +328,7 @@ def load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedu
                 schedule[day][tuple(row[0].split(" - "))] = row[work_days.index(day) + 1]
 
     # initialize_shift_according_to_old_schedule()
-        
+
 
 def get_user_choice():
     global choice, MAX_HARD_SHIFTS_PER_WEEK
@@ -325,7 +346,7 @@ Choose the type of shifts you'd like to create:
             break
         else:
             print("Invalid input. Please try again.")
-    
+
     choice = NORMAL if choice == "1" else DOUBLE
     MAX_HARD_SHIFTS_PER_WEEK = MAX_HARD_SHIFTS_PER_WEEK if choice == NORMAL else math.inf
 

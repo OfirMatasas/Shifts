@@ -12,11 +12,12 @@ class Shift:
         return f"{self.start_time.hour:02}:00-{self.end_time.hour:02}:00"
 
     def __eq__(self, other):
-        return other is not None and self.day == other.day and self.start_time == other.start_time and self.end_time == other.end_time
-    
+        return other is not None and self.day == other.day \
+            and self.start_time == other.start_time and self.end_time == other.end_time
+
     def is_same_day(self, other):
         return self.day == other.day
-    
+
     def is_same_time(self, other):
         return self.start_time == other.start_time and self.end_time == other.end_time
 
