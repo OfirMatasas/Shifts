@@ -4,37 +4,37 @@ from typing import Final
 
 from domain.workday_dto import WorkdaySequence
 
+
 class WorkdayUtils:
     """
-    Static class for working with workdays
+    A static class for working with workdays
     """
     
     @staticmethod
-    def create_workday_sequence(starting_day: datetime.date = None,
-                                ending_day: datetime.date = None) -> WorkdaySequence | ValueError:
+    def create_workday_sequence(starting_day: datetime.date = None, ending_day: datetime.date = None):
         """
         starting_date: The date that we wish to start from
         ending_date: The date until we wish the data to be included
 
-        returns An object of type WorkdaySequence
+        Returns an instance of WorkdaySequence
         
-        returns ValueError if provided dates are incompatible
+        Raises ValueError if provided dates are incompatible
         """        
+
         weekdays_names = []
         weekdays_dates = []
         delta_date = datetime.timedelta(1)
 
         if starting_day is None:
-            logging.info('Null starting date, assigning default -> today')
+            logging.info(f'Did not pass a starting date. Assigning a default value of today: {datetime.datetime.today()}')
             starting_day = datetime.datetime.today()
         if ending_day is None:
-            logging.info('Null ending date, assigning default -> today')
+            logging.info(f'Did not pass an ending date. Assigning a default value of {WorkdayConst.DATE_FORMAT} days from now: {datetime.datetime.now() + datetime.timedelta(WorkdayConst.DEFAULT_DAYS_COUNT)}')
             ending_day = (datetime.datetime.now() + datetime.timedelta(WorkdayConst.DEFAULT_DAYS_COUNT))
 
         current_day = starting_day
 
         try:
-
             while current_day <= ending_day:
                 weekdays_names.append(current_day.strftime('%A'))
                 weekdays_dates.append(current_day.strftime(WorkdayConst.DATE_FORMAT))
@@ -44,7 +44,7 @@ class WorkdayUtils:
 
         except Exception as e:
             logging.error(f'Error while calculating days: {e}')
-            return ValueError(f'Could not work with provided dates: {e}')
+            raise ValueError(f'Could not parse provided dates: {e}')
 
         
 
