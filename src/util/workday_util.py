@@ -9,7 +9,6 @@ class WorkdayUtils:
     """
     A static class for working with workdays
     """
-    
     @staticmethod
     def create_workday_sequence(starting_day: datetime.date = None, ending_day: datetime.date = None):
         """
@@ -17,19 +16,19 @@ class WorkdayUtils:
         ending_date: The date until we wish the data to be included
 
         Returns an instance of WorkdaySequence
-        
+
         Raises ValueError if provided dates are incompatible
-        """        
+        """
 
         weekdays_names = []
         weekdays_dates = []
         delta_date = datetime.timedelta(1)
 
         if starting_day is None:
-            logging.info(f'Did not pass a starting date. Assigning a default value of today: {datetime.datetime.today()}')
+            logging.info('Did not pass a starting date. Using default values')
             starting_day = datetime.datetime.today()
         if ending_day is None:
-            logging.info(f'Did not pass an ending date. Assigning a default value of {WorkdayConst.DATE_FORMAT} days from now: {datetime.datetime.now() + datetime.timedelta(WorkdayConst.DEFAULT_DAYS_COUNT)}')
+            logging.info('Did not pass an ending date. Using default values')
             ending_day = (datetime.datetime.now() + datetime.timedelta(WorkdayConst.DEFAULT_DAYS_COUNT))
 
         current_day = starting_day
@@ -39,14 +38,13 @@ class WorkdayUtils:
                 weekdays_names.append(current_day.strftime('%A'))
                 weekdays_dates.append(current_day.strftime(WorkdayConst.DATE_FORMAT))
                 current_day += delta_date
-            
+
             return WorkdaySequence(weekdays_names, weekdays_dates)
 
         except Exception as e:
             logging.error(f'Error while calculating days: {e}')
             raise ValueError(f'Could not parse provided dates: {e}')
 
-        
 
 class WorkdayConst:
     DATE_FORMAT: Final[str] = '%d-%m-%Y'
