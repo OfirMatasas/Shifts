@@ -23,6 +23,8 @@ SPACE_ON_CALL: Final[int] = -5
 DEFAULT_SHIFT_DURATION: Final[int] = 3
 DEFAULT_FIRST_SHIFT_START_TIME: Final[int] = 1
 HOURS_IN_DAY: Final[int] = 24
+READ_FILE_NAME: Final[str] = "schedule.csv"
+WRITE_FILE_NAME: Final[str] = "schedule.csv"
 
 # Team members' names
 HADAR: Final[str] = "Hadar"
@@ -131,11 +133,14 @@ def look_for_team_member_with_minimal_hard_shifts_count(shift: Shift):
 
     log.debug(f"Looking for a team member to set hard shift {shift} on {shift.day}")
     while True:
-        if 0 <= hard_shifts_count[team_members[member_index]] < MAX_HARD_SHIFTS_PER_WEEK:
-            log.debug(f"Set {shift} to {team_members[member_index]} (hard shifts count: {hard_shifts_count[team_members[member_index]]} out of {MAX_HARD_SHIFTS_PER_WEEK})")
+        current_member = team_members[member_index]
+        current_member_hard_shifts_count = hard_shifts_count[current_member]
+
+        if 0 <= current_member_hard_shifts_count < MAX_HARD_SHIFTS_PER_WEEK:
+            log.debug(f"Set {shift} to {current_member} (hard shifts count: {current_member_hard_shifts_count} out of {MAX_HARD_SHIFTS_PER_WEEK})")
             break
 
-        log.debug(f"Skipping {team_members[member_index]} (hard shifts count: {hard_shifts_count[team_members[member_index]]} out of {MAX_HARD_SHIFTS_PER_WEEK})")
+        log.debug(f"Skipping {current_member} (hard shifts count: {current_member_hard_shifts_count} out of {MAX_HARD_SHIFTS_PER_WEEK})")
         member_index += 1
 
     return member_index
@@ -273,7 +278,7 @@ def initialize_shift_according_to_old_schedule_hard_coded():
 def write_to_csv_file():
     # write the scehdule to a csv file
     
-    with open("schedule.csv", "w", newline="") as file:
+    with open(WRITE_FILE_NAME, "w", newline="") as file:
         csv_writer = writer(file)
         csv_writer.writerow([SHIFT] + work_days)
 
@@ -287,7 +292,7 @@ def write_to_csv_file():
 def load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedule():
     global on_call, schedule
 
-    with open("schedule.csv", "r", newline="") as file:
+    with open(READ_FILE_NAME, "r", newline="") as file:
         csv_reader = reader(file)
 
         for row in csv_reader:
