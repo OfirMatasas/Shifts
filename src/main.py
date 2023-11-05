@@ -1,16 +1,10 @@
 from tabulate import tabulate
 from csv import writer, reader
 import math
+from util.workday_util import WorkdayUtils
 
 # Constants
-SUNDAY = "Sunday"
-MONDAY = "Monday"
-TUESDAY = "Tuesday"
-WEDNESDAY = "Wednesday"
-THURSDAY = "Thursday"
-FRIDAY = "Friday"
-SATURDAY = "Saturday"
-SHIFT = "Shift"
+SHIFT = "Shift\n"
 ON_CALL = "On Call"
 NORMAL = "normal"
 DOUBLE = "double"
@@ -47,7 +41,9 @@ hard_shifts_hours = [("01:00", "04:00"), ("04:00", "07:00")]
 shifts_space = {key: 0 for key in team_members}
 
 # Define the work days
-work_days = [SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY]
+workday_seq = WorkdayUtils().create_workday_sequence()
+work_days = workday_seq.day_names
+work_days_dates = workday_seq.day_dates
 
 # Define the days off
 days_off = [
@@ -152,7 +148,7 @@ def set_on_call_for_team_member(shift):
 
 
 def print_shifts_schedule():
-    table = [[SHIFT] + work_days]
+    table = [[SHIFT] + [f'{work_days[i]}\n{work_days_dates[i]}' for i in range(0, len(work_days))]]
 
     for shift in shifts:
         table.append([f"{shift[0]} - {shift[1]}"] + [schedule[day][shift] for day in work_days])
