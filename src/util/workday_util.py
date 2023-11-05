@@ -38,7 +38,6 @@ class WorkdayUtils:
                 weekdays_names.append(current_day.strftime('%A'))
                 weekdays_dates.append(current_day.strftime(WorkdayConst.DATE_FORMAT))
                 current_day += delta_date
-
             return WorkdaySequence(weekdays_names, weekdays_dates)
 
         except Exception as e:

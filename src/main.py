@@ -61,7 +61,6 @@ def remove_team_members_if_day_off_is_on(day, shift):
     '''
     Check if the current shift is a start of a day off.
     If so - add the team members to the team_members_on_day_off list and remove them from the team_members list
-    '''
 
     for day_off in days_off:
         if (day, shift) == day_off[DAY_OFF_START_SHIFT_INDEX]:
@@ -243,7 +242,7 @@ def load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedu
                 schedule[day][tuple(row[0].split(" - "))] = row[work_days.index(day) + 1]
 
     # initialize_shift_according_to_old_schedule()
-
+    
 
 def get_user_choice():
     global choice, MAX_HARD_SHIFTS_PER_WEEK
