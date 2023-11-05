@@ -59,7 +59,8 @@ schedule = {day: {} for day in work_days}
 
 def remove_team_members_if_day_off_is_on(day, shift):
     '''
-    Check if the current shift is a start of a day off. If so - add the team members to the team_members_on_day_off list and remove them from the team_members list
+    Check if the current shift is a start of a day off.
+    If so - add the team members to the team_members_on_day_off list and remove them from the team_members list
     '''
 
     for day_off in days_off:
@@ -74,7 +75,8 @@ def remove_team_members_if_day_off_is_on(day, shift):
 
 def add_team_members_if_day_off_is_over(day, shift):
     '''
-    Check if the current shift is an end of a day off. If so - add the team members back to the team_members list and remove them from the team_members_on_day_off list
+    Check if the current shift is an end of a day off.
+    If so - add the team members back to the team_members list and remove them from the team_members_on_day_off list
     '''
 
     global team_members_on_day_off
@@ -96,7 +98,8 @@ def add_team_members_if_day_off_is_over(day, shift):
 
 def set_shift_to_relevant_team_member(day, shift):
     '''
-    Set the current shift to the team member with the maximum amount of shifts space, as long as they didn't have 2 hard shifts already earlier this week
+    Set the current shift to the team member with the maximum amount of shifts space,
+    as long as they didn't have 2 hard shifts already earlier this week
     '''
 
     member_index = 0
@@ -182,7 +185,8 @@ def build_shifts_schedule():
 
 def initialize_shift_according_to_old_schedule_hard_coded():
     '''
-    Initialize the shifts schedule according to old schedule, including on-call duties, shifts space and hard shifts count for each team member since their last day off
+    Initialize the shifts schedule according to old schedule,
+    including on-call duties, shifts space and hard shifts count for each team member since their last day off
     '''
 
     global on_call, hard_shifts_count, shifts_space
@@ -205,11 +209,11 @@ def initialize_shift_according_to_old_schedule_hard_coded():
     # For instance:
     #   team_members.remove(PAVEL)
     #   team_members.remove(MICHAL)
-    
+
 
 def write_to_csv_file():
     # write the scehdule to a csv file
-    
+
     with open("schedule.csv", "w", newline="") as file:
         csv_writer = writer(file)
         csv_writer.writerow([SHIFT] + work_days)
@@ -239,7 +243,7 @@ def load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedu
                 schedule[day][tuple(row[0].split(" - "))] = row[work_days.index(day) + 1]
 
     # initialize_shift_according_to_old_schedule()
-        
+
 
 def get_user_choice():
     global choice, MAX_HARD_SHIFTS_PER_WEEK
@@ -257,7 +261,7 @@ Choose the type of shifts you'd like to create:
             break
         else:
             print("Invalid input. Please try again.")
-    
+
     choice = NORMAL if choice == "1" else DOUBLE
     MAX_HARD_SHIFTS_PER_WEEK = MAX_HARD_SHIFTS_PER_WEEK if choice == NORMAL else math.inf
 
