@@ -1,4 +1,5 @@
 import logging as log
+from typing import Final
 from tabulate import tabulate
 from csv import writer, reader
 import math
@@ -7,34 +8,39 @@ from datetime import datetime
 from util.workday_util import WorkdayUtils
 
 # Constants
-SHIFT = "Shift\n"
-ON_CALL = "On Call"
-NORMAL = "normal"
-DOUBLE = "double"
-ON_CALL_SHIFT = Shift(day ="", start_time=datetime(year=2023, month=1, day=1, hour=19))
+SHIFT: Final[str] = "Shift\n"
+ON_CALL: Final[str] = "On Call"
+NORMAL: Final[str] = "normal"
+NUM_OF_MEMBERS_PER_NORMAL_SHIFT: Final[int] = 1
+DOUBLE: Final[str] = "double"
+NUM_OF_MEMBERS_PER_DOUBLE_SHIFT: Final[int] = 2
+ON_CALL_SHIFT: Final[Shift] = Shift(start_time=datetime(year=2023, month=1, day=1, hour=19))
 MAX_HARD_SHIFTS_PER_WEEK = 1
-DAY_OFF_START_SHIFT_INDEX = 0
-DAY_OFF_END_SHIFT_INDEX = 1
-DAY_OFF_TEAM_MEMBERS_INDEX = 2
-SPACE_ON_CALL = -5
+DAY_OFF_START_SHIFT_INDEX: Final[int] = 0
+DAY_OFF_END_SHIFT_INDEX: Final[int] = 1
+DAY_OFF_TEAM_MEMBERS_INDEX: Final[int] = 2
+SPACE_ON_CALL: Final[int] = -5
+DEFAULT_SHIFT_DURATION: Final[int] = 3
+DEFAULT_FIRST_SHIFT_START_TIME: Final[int] = 1
+HOURS_IN_DAY: Final[int] = 24
 
 # Team members' names
-HADAR = "Hadar"
-MATASAS = "Matasas"
-OFER = "Ofer"
-NISSAN = "Nissan"
-OR = "Or"
-MICHAL = "Michal"
-EYLON = "Eylon"
-PAVEL = "Pavel"
-IDO = "Ido"
-STEFANOV = "Stefanov"
-WEISS = "Weiss"
-SHAPIRA = "Shapira"
-ASSAF = "Assaf"
+HADAR: Final[str] = "Hadar"
+MATASAS: Final[str] = "Matasas"
+OFER: Final[str] = "Ofer"
+NISSAN: Final[str] = "Nissan"
+OR: Final[str] = "Or"
+MICHAL: Final[str] = "Michal"
+EYLON: Final[str] = "Eylon"
+PAVEL: Final[str] = "Pavel"
+IDO: Final[str] = "Ido"
+STEFANOV: Final[str] = "Stefanov"
+WEISS: Final[str] = "Weiss"
+SHAPIRA: Final[str] = "Shapira"
+ASSAF: Final[str] = "Assaf"
 
 # Define the shifts (24 hours divided into 3-hour shifts)
-shifts_hours = [hour for hour in range(1, 24, 3)]
+shifts_hours = [hour for hour in range(DEFAULT_FIRST_SHIFT_START_TIME, HOURS_IN_DAY, DEFAULT_SHIFT_DURATION)]
 
 # List of team members and their shifts space
 team_members = [HADAR, MATASAS, OFER, NISSAN, OR, MICHAL, EYLON, PAVEL, IDO, STEFANOV, WEISS, SHAPIRA, ASSAF]
@@ -102,8 +108,8 @@ def add_team_members_if_day_off_is_over(shift: Shift):
                     log.debug(f"Adding {member} to team members list")
                     team_members.append(member)
 
-                    log.debug(f"Set {member} shifts space to 100")
-                    shifts_space[member] = 100
+                    log.debug(f"Set {member} shifts space to math.inf")
+                    shifts_space[member] = math.inf
 
                     log.debug(f"Set {member} hard shifts count to 0")
                     hard_shifts_count[member] = 0
@@ -214,7 +220,7 @@ def print_shifts_schedule():
 
 
 def build_shifts_schedule():
-    number_of_people_per_shift = 1 if choice == NORMAL else 2
+    number_of_people_per_shift = NUM_OF_MEMBERS_PER_NORMAL_SHIFT if choice == NORMAL else NUM_OF_MEMBERS_PER_DOUBLE_SHIFT
 
     for day in work_days:
         log.debug(f"Building schedule for {day}")

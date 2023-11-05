@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+
 class Shift:
     def __init__(self, day: str = None, start_time: datetime = None, shift_duration: int = 3):
         self.day = day
