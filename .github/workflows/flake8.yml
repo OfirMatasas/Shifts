@@ -1,3 +1,4 @@
+# For more option check: https://github.com/marketplace/actions/python-flake8-lint#with-custom-settings
 name: flake8 Lint
 
 on: [push, pull_request]
@@ -15,3 +16,6 @@ jobs:
           python-version: "3.8"
       - name: flake8 Lint
         uses: py-actions/flake8@v2
+        with:
+          path: "src"
+          max-line-length: "120"
