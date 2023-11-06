@@ -25,6 +25,7 @@ DEFAULT_FIRST_SHIFT_START_TIME: Final[int] = 1
 HOURS_IN_DAY: Final[int] = 24
 READ_FILE_NAME: Final[str] = "schedule.csv"
 WRITE_FILE_NAME: Final[str] = "schedule.csv"
+LOG_FILE_NAME: Final[str] = "shifts.log"
 
 # Team members' names
 HADAR: Final[str] = "Hadar"
@@ -353,8 +354,13 @@ Choose the type of shifts you'd like to create:
     print(f"You chose to create {choice} shifts schedule.")
 
 
+def config_logger():
+    log.basicConfig(filename=LOG_FILE_NAME, filemode="w", level=log.DEBUG, force=True,
+                    format="%(asctime)s | %(levelname)s | %(message)s")
+
+
 def start_script():
-    log.getLogger().setLevel(log.INFO)
+    config_logger()
     get_user_choice()
 
     # load_old_schedule_fron_csv_file_and_initialize_shift_according_to_old_schedule()
