@@ -31,9 +31,12 @@ class WorkdayUtils:
             starting_day = datetime.datetime.today()
         if ending_day is None:
             logging.info('Did not pass an ending date.' +
-                         f'Assigning a default value of {WorkdayConst.DATE_FORMAT} ' +
-                         f'days left: {datetime.datetime.now() + datetime.timedelta(WorkdayConst.DEFAULT_DAYS_COUNT)}')
-            ending_day = (datetime.datetime.now() + datetime.timedelta(WorkdayConst.DEFAULT_DAYS_COUNT))
+                         f'Assigning a default value of {WorkdayConst.DEFAULT_DAYS_COUNT}. ' +
+                         f'Ending date: {starting_day + datetime.timedelta(WorkdayConst.DEFAULT_DAYS_COUNT)}')
+            ending_day = (starting_day + datetime.timedelta(WorkdayConst.DEFAULT_DAYS_COUNT - 1))
+
+        starting_day = starting_day if type(starting_day) is datetime.date else starting_day.date()
+        ending_day = ending_day if type(ending_day) is datetime.date else ending_day.date()
 
         current_day = starting_day
 
@@ -46,7 +49,7 @@ class WorkdayUtils:
             return WorkdaySequence(weekdays_names, weekdays_dates)
 
         except Exception as e:
-            logging.error(f'Error while calculating days: {e}')
+            logging.error(f'Error parsing date, current date: {current_day}, ending date: {ending_day} -> {e}')
             raise ValueError(f'Could not parse provided dates: {e}')
 
 
