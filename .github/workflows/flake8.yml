@@ -1,4 +1,3 @@
-# For more option check: https://github.com/marketplace/actions/python-flake8-lint#with-custom-settings
 name: flake8 Lint
 
 on: [push, pull_request]
@@ -10,12 +9,14 @@ jobs:
     steps:
       - name: Check out source repository
         uses: actions/checkout@v3
+      
       - name: Set up Python environment
         uses: actions/setup-python@v4
         with:
           python-version: "3.8"
+      
       - name: flake8 Lint
         uses: py-actions/flake8@v2
         with:
-          path: "src"
+          path: "src,tests"
           max-line-length: "120"
